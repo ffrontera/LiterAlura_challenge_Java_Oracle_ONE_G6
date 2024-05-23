@@ -7,14 +7,12 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
 public class ConsumoAPI {
-    private final String URL_BASE = "https://gutendex.com/books?search=";
-    private String url = URL_BASE;
+    private final String URL_BASE = "https://gutendex.com/books/?search=";
 
     public String obtenerDatos(String busqueda) {
-        url += busqueda;
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(url))
+                .uri(URI.create(URL_BASE + busqueda.replaceAll(" ", "%20")))
                 .build();
         HttpResponse<String> response = null;
         try {
@@ -25,8 +23,7 @@ public class ConsumoAPI {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-
         String json = response.body();
         return json;
-    }
+        }
 }
