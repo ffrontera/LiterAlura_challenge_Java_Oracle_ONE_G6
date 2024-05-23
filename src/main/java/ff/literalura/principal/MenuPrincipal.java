@@ -1,6 +1,7 @@
 package ff.literalura.principal;
 
 import ff.literalura.calculos.CalculosArrays;
+import ff.literalura.service.BuscarLibro;
 import ff.literalura.service.ConsumoAPI;
 
 import java.util.Scanner;
@@ -8,7 +9,8 @@ import java.util.Scanner;
 public class MenuPrincipal {
     private final String[] OPCIONES_MENU = {"Buscar Libro por titulo"};
     private final String SEPARADOR_HORIZONTAL = "-";
-    public final Scanner INPUT = new Scanner(System.in);
+    static public final Scanner INPUT = new Scanner(System.in);
+    private BuscarLibro libro = new BuscarLibro();
 
     public void correrPrograma() {
         int opcion;
@@ -16,6 +18,7 @@ public class MenuPrincipal {
         opcion = INPUT.nextInt();
         INPUT.nextLine();
         correrSeleccion(opcion);
+        INPUT.close();
     }
 
     public void mostratMenu(){
@@ -39,8 +42,8 @@ public class MenuPrincipal {
     private void correrSeleccion(int opcion) {
         switch (opcion){
             case 1:
-                ConsumoAPI datos = new ConsumoAPI();
-                System.out.println(datos.obtenerDatos("harry"));
+                libro.buscarLibroTitulo();
+                break;
         }
     }
 
