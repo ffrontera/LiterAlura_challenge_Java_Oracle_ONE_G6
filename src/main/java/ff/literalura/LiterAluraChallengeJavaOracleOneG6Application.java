@@ -1,7 +1,6 @@
 package ff.literalura;
 
 import ff.literalura.principal.MenuPrincipal;
-import ff.literalura.service.ConsumoAPI;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
