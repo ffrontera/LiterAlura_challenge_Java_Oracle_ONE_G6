@@ -1,7 +1,7 @@
 package ff.literalura.service;
 
 import ff.literalura.model.Datos;
-import ff.literalura.model.Libro;
+import ff.literalura.model.DatosLibro;
 
 import java.util.Optional;
 
@@ -12,13 +12,13 @@ public class BuscarLibro {
     private ConvertirDatos convertir = new ConvertirDatos();
     private String json;
 
-    public void buscarLibroTitulo(){
+    public DatosLibro buscarLibroTitulo(){
         String titulo;
         System.out.println("Ingrese el nombre de libro a buscar:");
         titulo = INPUT.nextLine();
         json = datos.obtenerDatos(titulo);
         var resultadoBusqueda = convertir.obetenerDatos(json, Datos.class);
-        Optional<Libro> libroBuscado = resultadoBusqueda.libros().stream()
+        Optional<DatosLibro> libroBuscado = resultadoBusqueda.libros().stream()
                 .filter(l -> l.titulo().toUpperCase().contains(titulo.toUpperCase()))
                 .findFirst();
         if (libroBuscado.isPresent()) {
@@ -26,7 +26,8 @@ public class BuscarLibro {
             System.out.println(libroBuscado.get());
         } else {
             System.out.println("Libro NO encontrado");
+            return null;
         }
-
+        return libroBuscado.get();
     }
 }

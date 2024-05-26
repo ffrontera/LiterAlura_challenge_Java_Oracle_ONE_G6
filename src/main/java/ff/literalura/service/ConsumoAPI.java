@@ -12,7 +12,7 @@ public class ConsumoAPI {
     public String obtenerDatos(String busqueda) {
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(URL_BASE + busqueda.replaceAll(" ", "+")))
+                .uri(URI.create(URL_BASE + busqueda.replaceAll(" ", "%20")))
                 .build();
         HttpResponse<String> response = null;
         try {

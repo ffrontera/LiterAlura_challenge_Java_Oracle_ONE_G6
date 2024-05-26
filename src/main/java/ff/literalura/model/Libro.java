@@ -1,21 +1,69 @@
 package ff.literalura.model;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import jakarta.persistence.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-public record Libro(
-        @JsonAlias("title") String titulo,
-        @JsonAlias("authors") List<Autor> autores,
-        @JsonAlias("languages") List<String> idiomas,
-        @JsonAlias("download_count") int descargas
-) {
+@Entity
+@Table(name = "libros")
+public class Libro {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long Id;
+    @Column(unique = true)
+    private String titulo;
+    @Enumerated(EnumType.STRING)
+    private Idioma idioma;
+    private Integer descargas;
+    @ManyToOne
+    private Autor autor;
+
+    public Libro(){}
+
+    public Libro(DatosLibro datosLibro){
+        this.titulo = datosLibro.titulo();
+        this.idioma = Idioma.fromString(datosLibro.idiomas().stream().limit(1).collect(Collectors.joining()));
+        this.descargas = datosLibro.descargas();
+    }
+
+    public void setAutor(Autor autor) {
+        this.autor = autor;
+    }
 
     @Override
     public String toString() {
         return "Libro: " + titulo +
-                "\nAutor/es: " + autores;
+                "autor: " + autor +
+                "idioma: " + idioma +
+                "numero de descargas'" + descargas;
+    }
+
+    public String getTitulo() {
+        return titulo;
+    }
+
+    public void setTitulo(String titulo) {
+        this.titulo = titulo;
+    }
+
+    public Idioma getIdioma() {
+        return idioma;
+    }
+
+    public void setIdioma(Idioma idioma) {
+        this.idioma = idioma;
+    }
+
+    public Integer getDescargas() {
+        return descargas;
+    }
+
+    public void setDescargas(Integer descargas) {
+        this.descargas = descargas;
+    }
+
+    public Autor getAutor() {
+        return autor;
     }
 }
