@@ -3,15 +3,14 @@ package ff.literalura.principal;
 import ff.literalura.calculos.CalculosArrays;
 import ff.literalura.model.Autor;
 import ff.literalura.model.DatosLibro;
+import ff.literalura.model.Idioma;
 import ff.literalura.model.Libro;
 import ff.literalura.repository.AutorRepository;
 import ff.literalura.service.BuscarLibro;
 import ff.literalura.service.ConsumoAPI;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Scanner;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class MenuPrincipal {
     private final String[] OPCIONES_MENU = {
@@ -27,6 +26,7 @@ public class MenuPrincipal {
     private AutorRepository repositorio;
     private DatosLibro libroBuscado;
     private BuscarLibro busqueda = new BuscarLibro();
+    CalculosArrays calculos = new CalculosArrays();
 
     public MenuPrincipal(AutorRepository repository) {
         this.repositorio = repository;
@@ -37,28 +37,28 @@ public class MenuPrincipal {
         boolean salir;
         do {
             mostratMenu();
-            opcion = validarOpcion();
+            opcion = validarOpcion(OPCIONES_MENU.length);
             salir = correrSeleccion(opcion);
         } while (!salir);
         INPUT.close();
     }
 
-    private int validarOpcion() {
-        int opcionSeleccionada = -1;
-        boolean continuar = false;
-        while (!continuar){
-            opcionSeleccionada = INPUT.nextInt();
-            INPUT.nextLine();
-            if (opcionSeleccionada >= 0 || opcionSeleccionada <= OPCIONES_MENU.length)
-                continuar = true;
-            else
-                System.out.println("Opción ingresada no válida");
-        }
-        return opcionSeleccionada;
+    private int validarOpcion(int largo) {
+        int opcionSeleccionada;
+        do {
+            try {
+                opcionSeleccionada = Integer.parseInt(INPUT.nextLine());
+                if (opcionSeleccionada >= 0 && opcionSeleccionada <= largo)
+                    return opcionSeleccionada;
+                else
+                    System.out.println("Opción ingresada no válida");
+            } catch (NumberFormatException e) {
+                System.out.println("¡ERROR! La opción ingresada debe ser un número entre 0 y " + largo);
+            }
+        } while (true);
     }
 
     public void mostratMenu() {
-        CalculosArrays calculos = new CalculosArrays();
         int anchoMenu = 9 + calculos.stringMasLargoArray(OPCIONES_MENU);
         int numeroOpcion;
         mostrarLineaVetical(anchoMenu);
@@ -87,31 +87,85 @@ public class MenuPrincipal {
                 break;
             case 1:
                 libroBuscado = busqueda.buscarLibroTitulo();
-                Autor autor = new Autor(libroBuscado);
-                Optional<Autor> buscarAutor = repositorio.findByNombreContainsIgnoreCase(autor.getNombre());
-                if (buscarAutor.isPresent())
-                    autor = buscarAutor.get();
-                else {
-                    autor.setLibros(new ArrayList<>());
-                    repositorio.save(autor);
-                }
-                Libro libro = new Libro(libroBuscado);
-                libro.setAutor(autor);
-                List<Libro> librosAutor = autor.getLibros();
-                librosAutor.add(libro);
-                autor.setLibros(librosAutor);
-                repositorio.save(autor);
+                if (libroBuscado == null)
+                    System.out.println("libro no encontrado");
+                else
+                    buscarLibro(libroBuscado);
                 break;
             case 2:
+                listarRegistroLibros();
                 break;
             case 3:
+                listarRegistroAutores();
                 break;
             case 4:
+                listarAutoresVivosAnio();
                 break;
             case 5:
+                listarLibrosIdiomas();
                 break;
         }
         return salir;
+    }
+
+    private void buscarLibro(DatosLibro libroBuscado) {
+        Autor autor = new Autor(libroBuscado);
+        Optional<Autor> buscarAutor = repositorio.findByNombreContainsIgnoreCase(autor.getNombre());
+        if (buscarAutor.isPresent())
+            autor = buscarAutor.get();
+        else {
+            autor.setLibros(new ArrayList<>());
+            repositorio.save(autor);
+        }
+        Libro libro = new Libro(libroBuscado);
+        libro.setAutor(autor);
+        Optional<Libro> libroBuscadoRegistrado = repositorio.buscarLibro(libro.getTitulo());
+        if (libroBuscadoRegistrado.isPresent())
+            System.out.println("Libro registrado anteriormente");
+        else {
+            List<Libro> librosAutor = autor.getLibros();
+            librosAutor.add(libro);
+            autor.setLibros(librosAutor);
+            repositorio.save(autor);
+        }
+    }
+
+
+    private void listarRegistroLibros() {
+        List<Libro> listadoLibros = repositorio.listarLibrosRegistrados();
+        System.out.println();
+        listadoLibros.stream().forEach(l -> System.out.println(l +"\n"));
+        System.out.println();
+    }
+
+    private void listarRegistroAutores() {
+        List<Autor> listadoAutores = repositorio.listarAutoresRegistrados();
+        System.out.println();
+        listadoAutores.forEach(a -> System.out.println(a));
+        System.out.println();
+    }
+
+    private void listarAutoresVivosAnio() {
+        System.out.println("Ingrese el año a buscar");
+        int anio = INPUT.nextInt();
+        INPUT.nextLine();
+        System.out.println();
+        Optional<Autor> autorContemporaneoAnio = repositorio.autorVivoAnio(anio);
+        if (autorContemporaneoAnio.isPresent())
+            autorContemporaneoAnio.stream().forEach(a -> System.out.println(a + "\n"));
+        else
+            System.out.println("No hay autores contemporenaos al año \"" + anio + "\"");
+    }
+
+    private void listarLibrosIdiomas() {
+        var idiomaEntrada = INPUT.nextLine();
+        var idioma = Idioma.fromString(idiomaEntrada);
+        List<Libro> librosIdioma = repositorio.librosIdioma(idioma);
+        if (!librosIdioma.isEmpty()) {
+            System.out.println("Libros en idioma " + idiomaEntrada);
+            librosIdioma.stream().forEach(l -> System.out.println("Libro: " + l.getIdioma() + " Autor: " + l.getAutor() + "\n"));
+        } else
+            System.out.println("No hay libros registrados en el idioma " + idiomaEntrada);
     }
 
     private void mostrarMensajeSalir() {

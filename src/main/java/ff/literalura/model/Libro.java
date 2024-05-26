@@ -34,9 +34,9 @@ public class Libro {
     @Override
     public String toString() {
         return "Libro: " + titulo +
-                "autor: " + autor +
-                "idioma: " + idioma +
-                "numero de descargas'" + descargas;
+                "\n  Autor: " + autor.getNombre() +
+                "\n  Idioma: " + idioma +
+                "\n  Numero de descargas: " + descargas;
     }
 
     public String getTitulo() {

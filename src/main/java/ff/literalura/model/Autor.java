@@ -28,11 +28,8 @@ public class Autor {
 
     @Override
     public String toString() {
-        return "Autor{" +
-                "anioMuerte=" + anioMuerte +
-                ", anioNacimiento=" + anioNacimiento +
-                ", nombre='" + nombre + '\'' +
-                '}';
+        return "Autor: " + nombre +
+                " (" + anioNacimiento + "-" + anioMuerte + ")";
     }
 
 
